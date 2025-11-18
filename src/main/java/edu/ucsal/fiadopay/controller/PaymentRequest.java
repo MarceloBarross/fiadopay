@@ -4,7 +4,14 @@ import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 
 import edu.ucsal.fiadopay.annotations.AntiFraud;
+import edu.ucsal.fiadopay.annotations.RequeridoSeValorIgual;
 
+@RequeridoSeValorIgual(
+    campoGatilho = "method",
+    valorQueDisparaObrigatoriedade = "CARD",
+    campoQueSeTornaObrigatorio = "installments",
+    message = "O número de parcelas (installments) é obrigatório para pagamentos do tipo CARD."
+)
 public record PaymentRequest(
     @NotBlank @Pattern(regexp = "(?i)CARD|PIX|DEBIT|BOLETO") String method,
     @NotBlank String currency,

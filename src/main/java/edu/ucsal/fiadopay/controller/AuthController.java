@@ -22,6 +22,6 @@ public class AuthController {
         || merchant.getStatus()!= Merchant.Status.ACTIVE) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
     }
-    return new TokenResponse("FAKE-"+merchant.getId(), "Bearer", 3600);
+    return new TokenResponse("FAKE-"+merchant.getId(), "Bearer", 360000);
   }
 }

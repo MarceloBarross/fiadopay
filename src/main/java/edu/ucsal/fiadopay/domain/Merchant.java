@@ -24,4 +24,5 @@ public class Merchant {
     private Status status = Status.ACTIVE;
 
     public enum Status { ACTIVE, BLOCKED }
+
 }

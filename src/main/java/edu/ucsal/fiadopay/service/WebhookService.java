@@ -37,7 +37,7 @@ public class WebhookService {
 
 
     void processAndWebhook(String paymentId){
-        try { Thread.sleep(delay); } catch (InterruptedException ignored) {}
+        try { Thread.sleep(10000); } catch (InterruptedException ignored) {}
         var p = payments.findById(paymentId).orElse(null);
         if (p==null) return;
 

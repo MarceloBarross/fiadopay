@@ -1,13 +1,9 @@
 package edu.ucsal.fiadopay.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.ucsal.fiadopay.controller.PaymentRequest;
 import edu.ucsal.fiadopay.controller.PaymentResponse;
 import edu.ucsal.fiadopay.domain.Payment;
-import edu.ucsal.fiadopay.repo.MerchantRepository;
 import edu.ucsal.fiadopay.repo.PaymentRepository;
-import edu.ucsal.fiadopay.repo.WebhookDeliveryRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,12 +24,7 @@ public class PaymentService {
   private final PaymentRepository payments;
 
 
-
-  @Value("${fiadopay.webhook-secret}") String secret;
-  @Value("${fiadopay.processing-delay-ms}") long delay;
-  @Value("${fiadopay.failure-rate}") double failRate;
-
-  public PaymentService(AutService autService, WebhookService webhookService, MerchantRepository merchants, PaymentRepository payments, WebhookDeliveryRepository deliveries, ObjectMapper objectMapper) {
+  public PaymentService(AutService autService, WebhookService webhookService, PaymentRepository payments) {
       this.autService = autService;
       this.webhookService = webhookService;
       this.payments = payments;

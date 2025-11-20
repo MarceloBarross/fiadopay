@@ -19,6 +19,7 @@ public class DeliverService {
     }
 
      void tryDeliver(Long deliveryId){
+        System.out.println("estamos nesta thread: " + Thread.currentThread().getName());
         var d = deliveries.findById(deliveryId).orElse(null);
         if (d==null) return;
         try {

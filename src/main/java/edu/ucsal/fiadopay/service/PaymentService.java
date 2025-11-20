@@ -4,6 +4,8 @@ import edu.ucsal.fiadopay.controller.PaymentRequest;
 import edu.ucsal.fiadopay.controller.PaymentResponse;
 import edu.ucsal.fiadopay.domain.Payment;
 import edu.ucsal.fiadopay.repo.PaymentRepository;
+
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +17,7 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 @Service
 public class PaymentService {
@@ -22,12 +25,14 @@ public class PaymentService {
   private final AutService autService;
   private final WebhookService webhookService;
   private final PaymentRepository payments;
+  private final Executor threadPool;
 
 
-  public PaymentService(AutService autService, WebhookService webhookService, PaymentRepository payments) {
+  public PaymentService(AutService autService, WebhookService webhookService, PaymentRepository payments, @Qualifier("poolPayment") Executor threadPool) {
       this.autService = autService;
       this.webhookService = webhookService;
       this.payments = payments;
+      this.threadPool = threadPool;
   }
 
   @Transactional
@@ -67,7 +72,7 @@ public class PaymentService {
 
     payments.save(payment);
 
-    CompletableFuture.runAsync(() -> webhookService.processAndWebhook(payment.getId()));
+    CompletableFuture.runAsync(() -> webhookService.processAndWebhook(payment.getId()), threadPool);
 
     return toResponse(payment);
   }

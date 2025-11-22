@@ -7,6 +7,8 @@ spring:
     driverClassName: org.h2.Driver
     username: sa
     password:
+    hikari:
+      maximum-pool-size: 20
   jpa:
     hibernate:
       ddl-auto: update

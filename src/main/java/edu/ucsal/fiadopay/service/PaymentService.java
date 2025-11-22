@@ -26,12 +26,7 @@ public class PaymentService {
   private final AutService autService;
   private final WebhookService webhookService;
   private final PaymentRepository payments;
-
-
-
-  @Value("${fiadopay.webhook-secret}") String secret;
-  @Value("${fiadopay.processing-delay-ms}") long delay;
-  @Value("${fiadopay.failure-rate}") double failRate;
+  
 
   public PaymentService(AutService autService, WebhookService webhookService, PaymentRepository payments) {
       this.autService = autService;

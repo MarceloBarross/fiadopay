@@ -6,6 +6,8 @@ import edu.ucsal.fiadopay.domain.WebhookDelivery;
 import edu.ucsal.fiadopay.repo.MerchantRepository;
 import edu.ucsal.fiadopay.repo.PaymentRepository;
 import edu.ucsal.fiadopay.repo.WebhookDeliveryRepository;
+
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,7 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 
 @Service
@@ -25,22 +28,32 @@ public class WebhookService {
     private final WebhookDeliveryRepository deliveries;
     private final DeliverService deliverService;
     private final ObjectMapper objectMapper;
+    private final Executor threadPool;
 
     @Value("${fiadopay.processing-delay-ms}") long delay;
     @Value("${fiadopay.failure-rate}") double failRate;
     @Value("${fiadopay.webhook-secret}") String secret;
 
-    public WebhookService(PaymentRepository payments, MerchantRepository merchants, WebhookDeliveryRepository deliveries, DeliverService deliverService, ObjectMapper objectMapper) {
+    public WebhookService(
+        PaymentRepository payments, 
+        MerchantRepository merchants, 
+        WebhookDeliveryRepository deliveries, 
+        DeliverService deliverService, 
+        ObjectMapper objectMapper,
+        @Qualifier("poolWebhook") Executor threadPool) 
+    {
         this.payments = payments;
         this.merchants = merchants;
         this.deliveries = deliveries;
         this.deliverService = deliverService;
         this.objectMapper = objectMapper;
+        this.threadPool = threadPool;
     }
 
 
     void processAndWebhook(String paymentId){
-        try { Thread.sleep(delay); } catch (InterruptedException ignored) {}
+        try { Thread.sleep(10000); } catch (InterruptedException ignored) {}
+        System.out.println("estamos nesta thread: " + Thread.currentThread().getName());
         var p = payments.findById(paymentId).orElse(null);
         if (p==null) return;
 
@@ -88,7 +101,7 @@ public class WebhookService {
                 .lastAttemptAt(null)
                 .build());
 
-        CompletableFuture.runAsync(() -> deliverService.tryDeliver(delivery.getId()));
+        CompletableFuture.runAsync(() -> deliverService.tryDeliver(delivery.getId()), threadPool);
     }
 
     public boolean validarRecebimento(String signatureHeader, String payloadRaw) {

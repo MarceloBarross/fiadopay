@@ -33,7 +33,7 @@ public class PaymentService {
   @Value("${fiadopay.processing-delay-ms}") long delay;
   @Value("${fiadopay.failure-rate}") double failRate;
 
-  public PaymentService(AutService autService, WebhookService webhookService, MerchantRepository merchants, PaymentRepository payments, WebhookDeliveryRepository deliveries, ObjectMapper objectMapper) {
+  public PaymentService(AutService autService, WebhookService webhookService, PaymentRepository payments) {
       this.autService = autService;
       this.webhookService = webhookService;
       this.payments = payments;

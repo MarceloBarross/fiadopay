@@ -1,6 +1,7 @@
 package edu.ucsal.fiadopay.controller;
 
 import edu.ucsal.fiadopay.service.PaymentService;
+import edu.ucsal.fiadopay.service.WebhookService;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 @RequiredArgsConstructor
 public class PaymentController {
   private final PaymentService service;
+  private final WebhookService webhook;
 
   @PostMapping("/payments")
   @SecurityRequirement(name = "bearerAuth")
@@ -35,5 +37,17 @@ public class PaymentController {
   public java.util.Map<String,Object> refund(@Parameter(hidden = true) @RequestHeader("Authorization") String auth,
                                    @RequestBody @Valid RefundRequest body) {
     return service.refund(auth, body.paymentId());
+  }
+
+  @PostMapping("/webhook/bank-notification")
+    public ResponseEntity<String> receberWebhook(@RequestHeader("X-Signature") String signature, @RequestBody String payLoad) {
+
+      boolean isValido = webhook.validarRecebimento(signature, payLoad);
+
+      if(!isValido) {
+          return ResponseEntity.status(401).body("Assinatura Invalida");
+      }
+
+      return ResponseEntity.ok("Recebido");
   }
 }

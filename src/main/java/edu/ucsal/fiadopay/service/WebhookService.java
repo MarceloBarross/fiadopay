@@ -9,11 +9,14 @@ import edu.ucsal.fiadopay.repo.WebhookDeliveryRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+
 
 @Service
 public class WebhookService {
@@ -88,11 +91,29 @@ public class WebhookService {
         CompletableFuture.runAsync(() -> deliverService.tryDeliver(delivery.getId()));
     }
 
+    public boolean validarRecebimento(String signatureHeader, String payloadRaw) {
+        if (signatureHeader == null || payloadRaw == null) {
+            return false;
+        }
+
+        String signatureCalculada = hmac(payloadRaw, secret);
+
+        return MessageDigest.isEqual(
+                signatureHeader.getBytes(StandardCharsets.UTF_8),
+                signatureCalculada.getBytes(StandardCharsets.UTF_8)
+        );
+    }
+
     private static String hmac(String payload, String secret){
         try {
+
+            byte[] secretBytes = secret.getBytes(StandardCharsets.UTF_8);
+            byte[] payloadBytes = payload.getBytes(StandardCharsets.UTF_8);
+
             var mac = javax.crypto.Mac.getInstance("HmacSHA256");
-            mac.init(new javax.crypto.spec.SecretKeySpec(secret.getBytes(), "HmacSHA256"));
-            return Base64.getEncoder().encodeToString(mac.doFinal(payload.getBytes()));
+            mac.init(new javax.crypto.spec.SecretKeySpec(secretBytes, "HmacSHA256"));
+
+            return Base64.getEncoder().encodeToString(mac.doFinal(payloadBytes));
         } catch (Exception e){ return ""; }
     }
 }
